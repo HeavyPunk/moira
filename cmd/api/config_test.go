@@ -32,6 +32,10 @@ func Test_apiConfig_getSettings(t *testing.T) {
 			EnableCORS: true,
 		}
 
+		moiraSystemConfig := cmd.MoiraSystem{
+			SystemTagPrefix: "system/",
+		}
+
 		expectedResult := &api.Config{
 			EnableCORS: true,
 			Listen:     "0000",
@@ -43,9 +47,12 @@ func Test_apiConfig_getSettings(t *testing.T) {
 					"test": {},
 				},
 			},
+			MoiraSystem: api.MoiraSystem{
+				SystemTagPrefix: "system/",
+			},
 		}
 
-		result := apiConf.getSettings(metricTTLs, api.FeatureFlags{IsReadonlyEnabled: true}, webConfig)
+		result := apiConf.getSettings(metricTTLs, api.FeatureFlags{IsReadonlyEnabled: true}, webConfig, moiraSystemConfig)
 		So(result, ShouldResemble, expectedResult)
 	})
 }

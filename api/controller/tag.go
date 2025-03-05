@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -59,9 +60,9 @@ func GetAllTagsAndSubscriptions(database moira.Database, logger moira.Logger) (*
 	return &tagsStatistics, nil
 }
 
-// GetAllTags gets all tag names.
-func GetAllTags(database moira.Database) (*dto.TagsData, *api.ErrorResponse) {
-	tagsNames, err := getTagNamesSorted(database)
+// GetTagsByFilter gets all tag names.
+func GetTagsByFilter(database moira.Database, filter func(string) bool) (*dto.TagsData, *api.ErrorResponse) {
+	tagsNames, err := getTagNamesSorted(database, filter)
 	if err != nil {
 		return nil, api.ErrorInternalServer(err)
 	}
@@ -73,10 +74,13 @@ func GetAllTags(database moira.Database) (*dto.TagsData, *api.ErrorResponse) {
 	return tagsData, nil
 }
 
-func getTagNamesSorted(database moira.Database) ([]string, error) {
+func getTagNamesSorted(database moira.Database, filter func(string) bool) ([]string, error) {
 	tagsNames, err := database.GetTagNames()
 	if err != nil {
 		return nil, err
+	}
+	if filter != nil {
+		tagsNames = slices.DeleteFunc(tagsNames, func(elem string) bool { return !filter(elem) })
 	}
 	sort.SliceStable(tagsNames, func(i, j int) bool { return strings.ToLower(tagsNames[i]) < strings.ToLower(tagsNames[j]) })
 	return tagsNames, nil

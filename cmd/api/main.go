@@ -67,6 +67,7 @@ func main() {
 		applicationConfig.ClustersMetricTTL(),
 		applicationConfig.Web.getFeatureFlags(),
 		&applicationConfig.Web,
+		applicationConfig.MoiraSystem,
 	)
 
 	logger, err := logging.ConfigureLog(applicationConfig.Logger.LogFile, applicationConfig.Logger.LogLevel, serviceName, applicationConfig.Logger.LogPrettyFormat)

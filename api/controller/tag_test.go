@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	logging "github.com/moira-alert/moira/logging/zerolog_adapter"
@@ -15,22 +16,30 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestGetAllTags(t *testing.T) {
+func TestGetTagsByFilter(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	database := mock_moira_alert.NewMockDatabase(mockCtrl)
 
-	Convey("Success", t, func() {
+	Convey("Success ", t, func() {
 		database.EXPECT().GetTagNames().Return([]string{"_wtf", "atag21", "Tag22", "Hi", "tag1", "1tag"}, nil)
-		data, err := GetAllTags(database)
-		So(err, ShouldBeNil)
-		So(data, ShouldResemble, &dto.TagsData{TagNames: []string{"1tag", "_wtf", "atag21", "Hi", "tag1", "Tag22"}})
+		Convey("without filter", func() {
+			data, err := GetTagsByFilter(database, nil)
+			So(err, ShouldBeNil)
+			So(data, ShouldResemble, &dto.TagsData{TagNames: []string{"1tag", "_wtf", "atag21", "Hi", "tag1", "Tag22"}})
+		})
+
+		Convey("with filter", func() {
+			data, err := GetTagsByFilter(database, func(tag string) bool { return strings.HasPrefix(tag, "T") })
+			So(err, ShouldBeNil)
+			So(data, ShouldResemble, &dto.TagsData{TagNames: []string{"Tag22"}})
+		})
 	})
 
 	Convey("Error", t, func() {
 		expected := fmt.Errorf("nooooooooooooooooooooo")
 		database.EXPECT().GetTagNames().Return(nil, expected)
-		data, err := GetAllTags(database)
+		data, err := GetTagsByFilter(database, nil)
 		So(err, ShouldResemble, api.ErrorInternalServer(expected))
 		So(data, ShouldBeNil)
 	})

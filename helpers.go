@@ -258,3 +258,15 @@ func ValidateStruct(s any) error {
 	validator := validator.New()
 	return validator.Struct(s)
 }
+
+func IsAllCorrespondingTo[T any](f func (T) bool, slice []T) bool {
+	if len(slice) == 0 {
+		return false
+	}
+	for _, s := range slice {
+		if !f(s) {
+			return false
+		}
+	}
+	return true
+}

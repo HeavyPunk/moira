@@ -35,6 +35,36 @@ func GetUserSubscriptions(database moira.Database, userLogin string) (*dto.Subsc
 	return subscriptionsList, nil
 }
 
+// GetUserSystemSubscriptions get all user subscriptions.
+func GetUserSystemSubscriptions(database moira.Database, userLogin string, systemTagPrefix string) (*dto.SubscriptionList, *api.ErrorResponse) {
+	subscriptionIDs, err := database.GetUserSubscriptionIDs(userLogin)
+	if err != nil {
+		return nil, api.ErrorInternalServer(err)
+	}
+	subscriptions, err := database.GetSubscriptions(subscriptionIDs)
+	if err != nil {
+		return nil, api.ErrorInternalServer(err)
+	}
+	subscriptionsList := &dto.SubscriptionList{
+		List: make([]moira.SubscriptionData, 0),
+	}
+	for _, subscription := range subscriptions {
+		if subscription != nil && subscription.IsSystem(systemTagPrefix) {
+			subscriptionsList.List = append(subscriptionsList.List, *subscription)
+		}
+	}
+	return subscriptionsList, nil
+}
+
+// CreateSystemSubscription
+func CreateSystemSubscription(dataBase moira.Database, auth *api.Authorization, userLogin, teamID string, subscription *dto.Subscription, systemTagPrefix string) *api.ErrorResponse {
+	data := moira.SubscriptionData(*subscription)
+	if !(&data).IsSystem(systemTagPrefix) {
+		return api.ErrorInvalidRequest(fmt.Errorf("system subscription should have only system tags"))
+	}
+	return CreateSubscription(dataBase, auth, userLogin, teamID, subscription)
+}
+
 // CreateSubscription create or update subscription.
 func CreateSubscription(dataBase moira.Database, auth *api.Authorization, userLogin, teamID string, subscription *dto.Subscription) *api.ErrorResponse {
 	if userLogin != "" && teamID != "" {
@@ -66,6 +96,21 @@ func CreateSubscription(dataBase moira.Database, auth *api.Authorization, userLo
 		return api.ErrorInternalServer(err)
 	}
 	return nil
+}
+
+// GetSubscription returns subscription by it's id.
+func GetSystemSubscription(dataBase moira.Database, subscriptionID string, systemSubscriptionPrefix string) (*dto.Subscription, *api.ErrorResponse) {
+	subscription, err := dataBase.GetSubscription(subscriptionID)
+	if err != nil {
+		return nil, api.ErrorInternalServer(err)
+	}
+
+	if subscription.IsSystem(systemSubscriptionPrefix) {
+		return &dto.Subscription{}, nil
+	}
+
+	dto := dto.Subscription(subscription)
+	return &dto, nil
 }
 
 // GetSubscription returns subscription by it's id.

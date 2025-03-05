@@ -248,6 +248,11 @@ type SubscriptionData struct {
 	TeamID            string       `json:"team_id" example:"324516ed-4924-4154-a62c-eb124234fce"`
 }
 
+// IsSystem checks for subscription matching to system subscription.
+func (subscription *SubscriptionData) IsSystem(systemTagPrefix string) bool {
+	return len(subscription.Tags) == 1 && IsAllCorrespondingTo(func(tag string) bool { return strings.HasPrefix(tag, systemTagPrefix)}, subscription.Tags)
+}
+
 // PlottingData represents plotting settings.
 type PlottingData struct {
 	Enabled bool   `json:"enabled" example:"true"`

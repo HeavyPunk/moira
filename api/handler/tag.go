@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -22,9 +23,39 @@ func tag(router chi.Router) {
 	})
 }
 
+func systemTag(router chi.Router) {
+	router.Get("/", getAllSystemTags)
+}
+
 // nolint: gofmt,goimports
 //
-//	@summary	Get all tags
+//	@summary	Get system all tags
+//	@id			get-all-system-tags
+//	@tags		tag
+//	@produce	json
+//	@success	200	{object}	dto.TagsData					"Tags fetched successfully"
+//	@failure	422	{object}	api.ErrorRenderExample			"Render error"
+//	@failure	500	{object}	api.ErrorInternalServerExample	"Internal server error"
+//	@router		/system-tag [get]
+func getAllSystemTags(writer http.ResponseWriter, request *http.Request) {
+	moiraSystemConfig := middleware.GetMoiraSystem(request)
+	tagData, err := controller.GetTagsByFilter(database, func(tag string) bool {
+		return strings.HasPrefix(tag, moiraSystemConfig.SystemTagPrefix)
+	})
+	if err != nil {
+		render.Render(writer, request, err) //nolint
+		return
+	}
+
+	if err := render.Render(writer, request, tagData); err != nil {
+		render.Render(writer, request, api.ErrorRender(err)) //nolint
+		return
+	}
+}
+
+// nolint: gofmt,goimports
+//
+//	@summary	Get all non-system tags
 //	@id			get-all-tags
 //	@tags		tag
 //	@produce	json
@@ -33,7 +64,10 @@ func tag(router chi.Router) {
 //	@failure	500	{object}	api.ErrorInternalServerExample	"Internal server error"
 //	@router		/tag [get]
 func getAllTags(writer http.ResponseWriter, request *http.Request) {
-	tagData, err := controller.GetAllTags(database)
+	moiraSystemConfig := middleware.GetMoiraSystem(request)
+	tagData, err := controller.GetTagsByFilter(database, func(tag string) bool {
+		return !strings.HasPrefix(tag, moiraSystemConfig.SystemTagPrefix)
+	})
 	if err != nil {
 		render.Render(writer, request, err) //nolint
 		return
