@@ -20,12 +20,6 @@ import (
 	"github.com/moira-alert/moira/database/redis"
 )
 
-// MoiraSystem is a struct that contains values for in-system interaction
-type MoiraSystem struct {
-	// Prifix that should be used to define moira's system triggers
-	SystemTagPrefix string `yaml:"system_tag_prefix" example:"moira/"`
-}
-
 // RedisConfig is a redis config structure that initialises at the start of moira.
 // Redis configuration depends on fields specified in redis config section:
 // 1. Use fields MasterName and Addrs to enable Redis Sentinel support.

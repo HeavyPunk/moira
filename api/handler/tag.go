@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -38,10 +37,7 @@ func systemTag(router chi.Router) {
 //	@failure	500	{object}	api.ErrorInternalServerExample	"Internal server error"
 //	@router		/system-tag [get]
 func getAllSystemTags(writer http.ResponseWriter, request *http.Request) {
-	moiraSystemConfig := middleware.GetMoiraSystem(request)
-	tagData, err := controller.GetTagsByFilter(database, func(tag string) bool {
-		return strings.HasPrefix(tag, moiraSystemConfig.SystemTagPrefix)
-	})
+	tagData, err := controller.GetAllSystemTags(database)
 	if err != nil {
 		render.Render(writer, request, err) //nolint
 		return
@@ -64,10 +60,7 @@ func getAllSystemTags(writer http.ResponseWriter, request *http.Request) {
 //	@failure	500	{object}	api.ErrorInternalServerExample	"Internal server error"
 //	@router		/tag [get]
 func getAllTags(writer http.ResponseWriter, request *http.Request) {
-	moiraSystemConfig := middleware.GetMoiraSystem(request)
-	tagData, err := controller.GetTagsByFilter(database, func(tag string) bool {
-		return !strings.HasPrefix(tag, moiraSystemConfig.SystemTagPrefix)
-	})
+	tagData, err := controller.GetAllTags(database)
 	if err != nil {
 		render.Render(writer, request, err) //nolint
 		return

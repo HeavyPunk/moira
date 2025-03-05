@@ -11,7 +11,6 @@ import (
 
 	chi_middleware "github.com/go-chi/chi/middleware"
 	"github.com/moira-alert/moira"
-	"github.com/moira-alert/moira/api"
 	"github.com/moira-alert/moira/api/dto"
 	"github.com/moira-alert/moira/api/middleware"
 	logging "github.com/moira-alert/moira/logging/zerolog_adapter"
@@ -96,12 +95,6 @@ func TestGetAllTags(t *testing.T) {
 			database = mockDb
 
 			testRequest := httptest.NewRequest(http.MethodGet, tagRoute, http.NoBody)
-			ctx := testRequest.Context()
-			ctx = context.WithValue(ctx,
-				middleware.ContextKey("moiraSystem"),
-				api.MoiraSystem {SystemTagPrefix: "system/"},
-			)
-			testRequest = testRequest.WithContext(ctx)
 
 			getAllTags(responseWriter, testRequest)
 
@@ -122,12 +115,6 @@ func TestGetAllTags(t *testing.T) {
 			database = mockDb
 
 			testRequest := httptest.NewRequest(http.MethodGet, tagRoute, http.NoBody)
-			ctx := testRequest.Context()
-			ctx = context.WithValue(ctx,
-				middleware.ContextKey("moiraSystem"),
-				api.MoiraSystem {SystemTagPrefix: "system/"},
-			)
-			testRequest = testRequest.WithContext(ctx)
 
 			getAllTags(responseWriter, testRequest)
 

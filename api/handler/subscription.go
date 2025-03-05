@@ -14,19 +14,6 @@ import (
 	"github.com/moira-alert/moira/api/middleware"
 )
 
-func systemSubscription(router chi.Router) {
-	router.Get("/", getUserSystemSubscriptions)
-	router.Put("/", createSystemSubscription)
-	router.Route("/{subscriptionId}", func(router chi.Router) {
-		router.Use(middleware.SubscriptionContext)
-		router.Use(subscriptionFilter)
-		router.Get("/", getSystemSubscription)
-		router.Put("/", updateSystemSubscription)
-		router.Delete("/", removeSubscription)
-		router.Put("/test", sendTestNotification)
-	})
-}
-
 func subscription(router chi.Router) {
 	router.Get("/", getUserSubscriptions)
 	router.Put("/", createSubscription)
@@ -38,31 +25,6 @@ func subscription(router chi.Router) {
 		router.Delete("/", removeSubscription)
 		router.Put("/test", sendTestNotification)
 	})
-}
-
-// nolint: gofmt,goimports
-//
-//	@summary	Get all system subscriptions
-//	@id			get-user-system-subscriptions
-//	@tags		subscription
-//	@produce	json
-//	@success	200	{object}	dto.SubscriptionList			"Subscriptions fetched successfully"
-//	@failure	422	{object}	api.ErrorRenderExample			"Render error"
-//	@failure	500	{object}	api.ErrorInternalServerExample	"Internal server error"
-//	@router		/subscription [get]
-func getUserSystemSubscriptions(writer http.ResponseWriter, request *http.Request) {
-	userLogin := middleware.GetLogin(request)
-	moiraSystemConfig := middleware.GetMoiraSystem(request)
-	subscriptions, err := controller.GetUserSystemSubscriptions(database, userLogin, moiraSystemConfig.SystemTagPrefix)
-	if err != nil {
-		render.Render(writer, request, err) //nolint
-		return
-	}
-
-	if err := render.Render(writer, request, subscriptions); err != nil {
-		render.Render(writer, request, api.ErrorRender(err)) //nolint
-		return
-	}
 }
 
 // nolint: gofmt,goimports
@@ -84,44 +46,6 @@ func getUserSubscriptions(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	if err := render.Render(writer, request, subscriptions); err != nil {
-		render.Render(writer, request, api.ErrorRender(err)) //nolint
-		return
-	}
-}
-
-// nolint: gofmt,goimports
-//
-//	@summary	Create a new system subscription
-//	@id			create-system-subscription
-//	@tags		subscription
-//	@accept		json
-//	@produce	json
-//	@param		subscription	body		dto.Subscription				true	"Subscription data"
-//	@success	200				{object}	dto.Subscription				"Subscription created successfully"
-//	@failure	400				{object}	api.ErrorInvalidRequestExample	"Bad request from client"
-//	@failure	422				{object}	api.ErrorRenderExample			"Render error"
-//	@failure	500				{object}	api.ErrorInternalServerExample	"Internal server error"
-//	@router		/system-subscription [put]
-func createSystemSubscription(writer http.ResponseWriter, request *http.Request) {
-	subscription := &dto.Subscription{}
-	if err := render.Bind(request, subscription); err != nil {
-		render.Render(writer, request, api.ErrorInvalidRequest(err)) //nolint
-		return
-	}
-	userLogin := middleware.GetLogin(request)
-	auth := middleware.GetAuth(request)
-
-	if subscription.AnyTags && len(subscription.Tags) > 0 {
-		writer.WriteHeader(http.StatusBadRequest)
-		render.Render(writer, request, api.ErrorInvalidRequest( //nolint
-			errors.New("if any_tags is true, then the tags must be empty")))
-		return
-	}
-	if err := controller.CreateSubscription(database, auth, userLogin, "", subscription); err != nil {
-		render.Render(writer, request, err) //nolint
-		return
-	}
-	if err := render.Render(writer, request, subscription); err != nil {
 		render.Render(writer, request, api.ErrorRender(err)) //nolint
 		return
 	}
@@ -181,47 +105,6 @@ func subscriptionFilter(next http.Handler) http.Handler {
 	})
 }
 
-// systemSubscriptionFilter is middleware for check subscriptionFilter checks and subscription kind.
-func systemSubscriptionFilter(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		subscriptionID := middleware.GetSubscriptionID(request)
-		moiraSystemSettings := middleware.GetMoiraSystem(request)
-		_, err := controller.GetSystemSubscription(database, subscriptionID, moiraSystemSettings.SystemTagPrefix)
-		if err != nil {
-			render.Render(writer, request, err) //nolint
-			return
-		}
-		subscriptionFilter(next)
-	})
-}
-
-// nolint: gofmt,goimports
-//
-//	@summary	Get subscription by id
-//	@id			get-subscription
-//	@tags		subscription
-//	@produce	json
-//	@param		subscriptionID	path		string							true	"ID of the subscription to get"	default(bcba82f5-48cf-44c0-b7d6-e1d32c64a88c)
-//	@success	200				{object}	dto.Subscription				"Subscription fetched successfully"
-//	@failure	403				{object}	api.ErrorForbiddenExample		"Forbidden"
-//	@failure	404				{object}	api.ErrorNotFoundExample		"Resource not found"
-//	@failure	422				{object}	api.ErrorRenderExample			"Render error"
-//	@failure	500				{object}	api.ErrorInternalServerExample	"Internal server error"
-//	@router		/subscription/{subscriptionID} [get]
-func getSystemSubscription(writer http.ResponseWriter, request *http.Request) {
-	subscriptionID := middleware.GetSubscriptionID(request)
-	moiraSystemConfig := middleware.GetMoiraSystem(request)
-	subscription, err := controller.GetSystemSubscription(database, subscriptionID, moiraSystemConfig.SystemTagPrefix)
-	if err != nil {
-		render.Render(writer, request, err) //nolint
-		return
-	}
-	if err := render.Render(writer, request, subscription); err != nil {
-		render.Render(writer, request, api.ErrorRender(err)) //nolint
-		return
-	}
-}
-
 // nolint: gofmt,goimports
 //
 //	@summary	Get subscription by id
@@ -265,53 +148,6 @@ func getSubscription(writer http.ResponseWriter, request *http.Request) {
 //	@failure	500				{object}	api.ErrorInternalServerExample	"Internal server error"
 //	@router		/subscription/{subscriptionID} [put]
 func updateSubscription(writer http.ResponseWriter, request *http.Request) {
-	subscription := &dto.Subscription{}
-	if err := render.Bind(request, subscription); err != nil {
-		switch err.(type) { // nolint:errorlint
-		case dto.ErrProvidedContactsForbidden:
-			render.Render(writer, request, api.ErrorForbidden(err.Error())) //nolint
-		default:
-			render.Render(writer, request, api.ErrorInvalidRequest(err)) //nolint
-		}
-		return
-	}
-
-	if subscription.AnyTags && len(subscription.Tags) > 0 {
-		writer.WriteHeader(http.StatusBadRequest)
-		render.Render(writer, request, api.ErrorInvalidRequest( //nolint
-			errors.New("if any_tags is true, then the tags must be empty")))
-		return
-	}
-
-	subscriptionData := request.Context().Value(subscriptionKey).(moira.SubscriptionData)
-
-	if err := controller.UpdateSubscription(database, subscriptionData.ID, subscriptionData.User, subscription); err != nil {
-		render.Render(writer, request, err) //nolint
-		return
-	}
-	if err := render.Render(writer, request, subscription); err != nil {
-		render.Render(writer, request, api.ErrorRender(err)) //nolint
-		return
-	}
-}
-
-// nolint: gofmt,goimports
-//
-//	@summary	Update a system subscription
-//	@id			update-system-subscription
-//	@tags		subscription
-//	@accept		json
-//	@produce	json
-//	@param		subscriptionID	path		string							true	"ID of the subscription to update"	default(bcba82f5-48cf-44c0-b7d6-e1d32c64a88c)
-//	@param		subscription	body		dto.Subscription				true	"Updated subscription data"
-//	@success	200				{object}	dto.Subscription				"Subscription updated successfully"
-//	@failure	400				{object}	api.ErrorInvalidRequestExample	"Bad request from client"
-//	@failure	403				{object}	api.ErrorForbiddenExample		"Forbidden"
-//	@failure	404				{object}	api.ErrorNotFoundExample		"Resource not found"
-//	@failure	422				{object}	api.ErrorRenderExample			"Render error"
-//	@failure	500				{object}	api.ErrorInternalServerExample	"Internal server error"
-//	@router		/system-subscription/{subscriptionID} [put]
-func updateSystemSubscription(writer http.ResponseWriter, request *http.Request) {
 	subscription := &dto.Subscription{}
 	if err := render.Bind(request, subscription); err != nil {
 		switch err.(type) { // nolint:errorlint

@@ -353,15 +353,6 @@ func LimitsContext(limit api.LimitsConfig) func(next http.Handler) http.Handler 
 	}
 }
 
-func MoiraSystemContext(system api.MoiraSystem) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			ctx := context.WithValue(request.Context(), moiraSystemConextKey, system)
-			next.ServeHTTP(writer, request.WithContext(ctx))
-		})
-	}
-}
-
 // SearchTextContext compiles and puts search text regex to request context.
 func SearchTextContext(defaultRegex *regexp.Regexp) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

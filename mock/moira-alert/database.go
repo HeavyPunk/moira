@@ -700,6 +700,35 @@ func (mr *MockDatabaseMockRecorder) GetTagNames() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTagNames", reflect.TypeOf((*MockDatabase)(nil).GetTagNames))
 }
 
+// GetSystemTagNames mocks base method.
+func (m *MockDatabase) GetSystemTagNames() ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSystemTagNames")
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSystemTagNames indicates an expected call of GetSystemTagNames.
+func (mr *MockDatabaseMockRecorder) GetSystemTagNames() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSystemTagNames", reflect.TypeOf((*MockDatabase)(nil).GetSystemTagNames))
+}
+
+// SyncSystemTags mocks base method.
+func (m *MockDatabase) SyncSystemTags(tags []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SyncSystemTags")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SyncSystemTags indicates an expected call of SyncSystemTags
+func (mr *MockDatabaseMockRecorder) SyncSystemTags(tags []string) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncSystemTags", reflect.TypeOf((*MockDatabase)(nil).SyncSystemTags))
+}
+
 // GetTagTriggerIDs mocks base method.
 func (m *MockDatabase) GetTagTriggerIDs(arg0 string) ([]string, error) {
 	m.ctrl.T.Helper()

@@ -44,7 +44,6 @@ var (
 	metricContextKey     ContextKey = "metric"
 	statesContextKey     ContextKey = "states"
 	limitsContextKey     ContextKey = "limits"
-	moiraSystemConextKey ContextKey = "moiraSystem"
 	searchTextContextKey ContextKey = "searchText"
 	sortOrderContextKey  ContextKey = "sort"
 
@@ -190,11 +189,6 @@ func GetStates(request *http.Request) map[string]struct{} {
 // GetLimits returns configured limits.
 func GetLimits(request *http.Request) api.LimitsConfig {
 	return request.Context().Value(limitsContextKey).(api.LimitsConfig)
-}
-
-// GetMoiraSystem returns configured moira system settings.
-func GetMoiraSystem(request *http.Request) api.MoiraSystem {
-	return request.Context().Value(moiraSystemConextKey).(api.MoiraSystem)
 }
 
 // GetSearchText returns search text regexp.

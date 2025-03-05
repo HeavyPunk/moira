@@ -17,12 +17,6 @@ type WebContact struct {
 	Help            string `json:"help,omitempty" example:"### Domains whitelist:\n - moira.ru\n"`
 }
 
-// MoiraSystem is a struct that contains values for in-system interaction
-type MoiraSystem struct {
-	// Prifix that should be used to define moira's system triggers
-	SystemTagPrefix string `yaml:"system_tag_prefix" example:"moira/"`
-}
-
 // FeatureFlags is struct to manage feature flags.
 type FeatureFlags struct {
 	IsPlottingDefaultOn              bool            `json:"isPlottingDefaultOn" example:"false"`
@@ -63,7 +57,6 @@ type Config struct {
 	Flags         FeatureFlags
 	Authorization Authorization
 	Limits        LimitsConfig
-	MoiraSystem		MoiraSystem
 }
 
 // WebConfig is container for web ui configuration parameters.

@@ -15,7 +15,6 @@ import (
 type config struct {
 	Redis               cmd.RedisConfig               `yaml:"redis"`
 	Logger              cmd.LoggerConfig              `yaml:"log"`
-	MoiraSystem					cmd.MoiraSystem								`yaml:"moira_system"`
 	API                 apiConfig                     `yaml:"api"`
 	Web                 webConfig                     `yaml:"web"`
 	Telemetry           cmd.TelemetryConfig           `yaml:"telemetry"`
@@ -159,7 +158,6 @@ func (config *apiConfig) getSettings(
 	metricsTTL map[moira.ClusterKey]time.Duration,
 	flags api.FeatureFlags,
 	webConfig *webConfig,
-	moiraSystem cmd.MoiraSystem,
 ) *api.Config {
 	return &api.Config{
 		EnableCORS:    config.EnableCORS,
@@ -168,13 +166,6 @@ func (config *apiConfig) getSettings(
 		Flags:         flags,
 		Authorization: config.Authorization.toApiConfig(webConfig),
 		Limits:        config.Limits.ToLimits(),
-		MoiraSystem:	 toApiConfig(moiraSystem),
-	}
-}
-
-func toApiConfig(moiraSystem cmd.MoiraSystem) api.MoiraSystem {
-	return api.MoiraSystem{
-		SystemTagPrefix: moiraSystem.SystemTagPrefix,
 	}
 }
 
