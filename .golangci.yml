@@ -50,6 +50,8 @@ linters:
     - wrapcheck
     - zerologlint
     - modernize
+    - goconst
+    - prealloc
   settings:
     gocyclo:
       min-complexity: 15

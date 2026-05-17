@@ -227,7 +227,7 @@ func (selfCheck *SelfCheckWorker) buildTriggersTableForSubscription(subscription
 
 	for _, link := range triggersTable {
 		builder.WriteString("- ")
-		builder.WriteString(fmt.Sprintf("[%s](%s)", strings.Join(link.Tags, "|"), link.Link))
+		fmt.Fprintf(&builder, "[%s](%s)", strings.Join(link.Tags, "|"), link.Link)
 		builder.WriteString("\n")
 	}
 

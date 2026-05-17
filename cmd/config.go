@@ -114,6 +114,20 @@ func (config *RedisConfig) GetSettings() redis.DatabaseConfig {
 	}
 }
 
+type PostgresqlConfig struct {
+	Master struct {
+		ConnectionString string
+	}
+	Replicas []struct {
+		ConnectionString string
+	}
+}
+
+type DatabaseConfig struct {
+	Redis      RedisConfig
+	Postgresql PostgresqlConfig
+}
+
 // NotificationHistoryConfig is the config which coordinates interaction with notification statistics.
 // E.g. how much time should we store it, or how many history items can we request from database.
 type NotificationHistoryConfig struct {

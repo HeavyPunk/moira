@@ -76,23 +76,6 @@ type Database interface {
 	GetTeamSubscriptionIDs(teamID string) ([]string, error)
 	GetTagsSubscriptions(tags []string) ([]*SubscriptionData, error)
 
-	// Patterns and metrics storing
-	GetPatterns() ([]string, error)
-	AddPatternMetric(pattern, metric string) error
-	GetPatternMetrics(pattern string) ([]string, error)
-	RemovePattern(pattern string) error
-	RemovePatternsMetrics(pattern []string) error
-	RemovePatternWithMetrics(pattern string) error
-
-	SubscribeMetricEvents(tomb *tomb.Tomb, params *SubscribeMetricEventsParams) (<-chan *MetricEvent, error)
-	SaveMetrics(buffer []*MatchedMetric) error
-	GetMetricRetention(metric string) (int64, error)
-	GetMetricsValues(metrics []string, from int64, until int64) (map[string][]*MetricValue, error)
-	RemoveMetricRetention(metric string) error
-	RemoveMetricValues(metric string, from, to string) (int64, error)
-	RemoveMetricsValues(metrics []string, toTime int64) error
-	GetMetricsTTLSeconds() int64
-
 	AddTriggersToCheck(clusterKey ClusterKey, triggerIDs []string) error
 	GetTriggersToCheck(clusterKey ClusterKey, count int) ([]string, error)
 	GetTriggersToCheckCount(clusterKey ClusterKey) (int64, error)
@@ -131,14 +114,6 @@ type Database interface {
 	IsTeamContainUser(teamID, userID string) (bool, error)
 	DeleteTeam(teamID, userID string) error
 
-	// Metrics management
-	CleanUpOutdatedMetrics(duration time.Duration) error
-	CleanUpFutureMetrics(duration time.Duration) error
-	CleanupOutdatedPatternMetrics() (int64, error)
-	CleanUpAbandonedRetentions() error
-	RemoveMetricsByPrefix(pattern string) error
-	RemoveAllMetrics() error
-
 	// Delivery checks
 	DeliveryCheckerDatabase
 
@@ -150,6 +125,34 @@ type Database interface {
 
 	// ScheduledNotification storing
 	ScheduledNotificationsDatabase
+
+	// Patterns and metrics storing
+	PatternsAndMetricsDatabase
+}
+
+type PatternsAndMetricsDatabase interface {
+	GetPatterns() ([]string, error)
+	AddPatternMetric(pattern, metric string) error
+	GetPatternMetrics(pattern string) ([]string, error)
+	RemovePattern(pattern string) error
+	RemovePatternsMetrics(pattern []string) error
+	RemovePatternWithMetrics(pattern string) error
+
+	SubscribeMetricEvents(tomb *tomb.Tomb, params *SubscribeMetricEventsParams) (<-chan *MetricEvent, error)
+	SaveMetrics(buffer []*MatchedMetric) error
+	GetMetricRetention(metric string) (int64, error)
+	GetMetricsValues(metrics []string, from int64, until int64) (map[string][]*MetricValue, error)
+	RemoveMetricRetention(metric string) error
+	RemoveMetricValues(metric string, from, to string) (int64, error)
+	RemoveMetricsValues(metrics []string, toTime int64) error
+	GetMetricsTTLSeconds() int64
+
+	CleanUpOutdatedMetrics(duration time.Duration) error
+	CleanUpFutureMetrics(duration time.Duration) error
+	CleanupOutdatedPatternMetrics() (int64, error)
+	CleanUpAbandonedRetentions() error
+	RemoveMetricsByPrefix(pattern string) error
+	RemoveAllMetrics() error
 }
 
 // ScheduledNotificationsDatabase is used to schedule and fetch notifications, as well as to view list of all notifications and delete some when needed.

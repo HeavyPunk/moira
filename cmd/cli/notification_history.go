@@ -115,6 +115,7 @@ func mergeNotificationHistory(logger moira.Logger, database moira.Database) erro
 						Member: eventBytes,
 					})
 				}
+
 				return nil
 			})
 			if err != nil {
@@ -128,6 +129,7 @@ func mergeNotificationHistory(logger moira.Logger, database moira.Database) erro
 				for _, id := range contactIDs {
 					pipe.Del(connector.Context(), id)
 				}
+
 				return nil
 			})
 			if err != nil {
@@ -135,6 +137,7 @@ func mergeNotificationHistory(logger moira.Logger, database moira.Database) erro
 			}
 
 			var totalDelCount int64
+
 			for i, cmd := range cmds {
 				deleted, err := cmd.(*goredis.IntCmd).Result()
 				if err != nil {
@@ -143,6 +146,7 @@ func mergeNotificationHistory(logger moira.Logger, database moira.Database) erro
 						Error(err).
 						Msg("failed to delete")
 				}
+
 				totalDelCount += deleted
 			}
 

@@ -201,7 +201,7 @@ func (trigger TriggerData) GetTriggerURI(frontURI string) string {
 func (trigger *TriggerData) GetTags() string {
 	var buffer bytes.Buffer
 	for _, tag := range trigger.Tags {
-		buffer.WriteString(fmt.Sprintf("[%s]", tag))
+		fmt.Fprintf(&buffer, "[%s]", tag)
 	}
 
 	return buffer.String()

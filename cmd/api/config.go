@@ -15,6 +15,7 @@ import (
 
 type config struct {
 	Redis               cmd.RedisConfig               `yaml:"redis"`
+	Database            cmd.DatabaseConfig            `yaml:"database"`
 	Logger              cmd.LoggerConfig              `yaml:"log"`
 	API                 apiConfig                     `yaml:"api"`
 	Web                 webConfig                     `yaml:"web"`

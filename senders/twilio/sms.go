@@ -38,22 +38,22 @@ func (sender *twilioSenderSms) buildMessage(events moira.NotificationEvents, tri
 
 	state := events.GetCurrentState(throttled)
 
-	message.WriteString(fmt.Sprintf("%s %s %s (%d)\n", state, trigger.Name, trigger.GetTags(), len(events)))
+	fmt.Fprintf(&message, "%s %s %s (%d)\n", state, trigger.Name, trigger.GetTags(), len(events))
 
 	for i, event := range events {
 		if i > printEventsCount-1 {
 			break
 		}
 
-		message.WriteString(fmt.Sprintf("\n%s: %s = %s (%s to %s)", event.FormatTimestamp(sender.location, moira.DefaultTimeFormat), event.Metric, event.GetMetricsValues(moira.DefaultNotificationSettings), event.OldState, event.State))
+		fmt.Fprintf(&message, "\n%s: %s = %s (%s to %s)", event.FormatTimestamp(sender.location, moira.DefaultTimeFormat), event.Metric, event.GetMetricsValues(moira.DefaultNotificationSettings), event.OldState, event.State)
 
 		if msg := event.CreateMessage(sender.location); len(msg) > 0 {
-			message.WriteString(fmt.Sprintf(". %s", msg))
+			fmt.Fprintf(&message, ". %s", msg)
 		}
 	}
 
 	if len(events) > printEventsCount {
-		message.WriteString(fmt.Sprintf("\n\n...and %d more events.", len(events)-printEventsCount))
+		fmt.Fprintf(&message, "\n\n...and %d more events.", len(events)-printEventsCount)
 	}
 
 	if throttled {

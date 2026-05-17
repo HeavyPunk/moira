@@ -105,17 +105,17 @@ func (sender *Sender) buildMessage(events moira.NotificationEvents, throttled bo
 			break
 		}
 
-		message.WriteString(fmt.Sprintf("%s: %s = %s (%s to %s)", event.FormatTimestamp(sender.location, moira.DefaultTimeFormat), event.Metric, event.GetMetricsValues(moira.DefaultNotificationSettings), event.OldState, event.State))
+		fmt.Fprintf(&message, "%s: %s = %s (%s to %s)", event.FormatTimestamp(sender.location, moira.DefaultTimeFormat), event.Metric, event.GetMetricsValues(moira.DefaultNotificationSettings), event.OldState, event.State)
 
 		if msg := event.CreateMessage(sender.location); len(msg) > 0 {
-			message.WriteString(fmt.Sprintf(". %s\n", msg))
+			fmt.Fprintf(&message, ". %s\n", msg)
 		} else {
 			message.WriteString("\n")
 		}
 	}
 
 	if len(events) > printEventsCount {
-		message.WriteString(fmt.Sprintf("\n...and %d more events.", len(events)-printEventsCount))
+		fmt.Fprintf(&message, "\n...and %d more events.", len(events)-printEventsCount)
 	}
 
 	if throttled {
@@ -133,7 +133,7 @@ func (sender *Sender) buildTitle(events moira.NotificationEvents, trigger moira.
 	for len([]rune(title)) > titleLimit {
 		var tagBuffer bytes.Buffer
 		for i := 0; i < len(trigger.Tags)-tags; i++ {
-			tagBuffer.WriteString(fmt.Sprintf("[%s]", trigger.Tags[i]))
+			fmt.Fprintf(&tagBuffer, "[%s]", trigger.Tags[i])
 		}
 
 		title = fmt.Sprintf("%s %s %s.... (%d)", state, trigger.Name, tagBuffer.String(), len(events))

@@ -140,7 +140,7 @@ func (sender *Sender) buildTitle(events moira.NotificationEvents, trigger moira.
 	for len([]rune(title)) > titleLimit {
 		var tagBuffer bytes.Buffer
 		for i := 0; i < len(trigger.Tags)-tags; i++ {
-			tagBuffer.WriteString(fmt.Sprintf("[%s]", trigger.Tags[i]))
+			fmt.Fprintf(&tagBuffer, "[%s]", trigger.Tags[i])
 		}
 
 		title = fmt.Sprintf("%s %s %s.... (%d)", state, trigger.Name, tagBuffer.String(), len(events))
