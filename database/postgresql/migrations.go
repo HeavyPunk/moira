@@ -15,7 +15,9 @@ func (conn *DbConnector) ApplyMigrations(ctx context.Context) error {
 		migrations.Init_01(),
 	}
 
-	conn.db.Master()
+	if err := conn.createMigrationsIfNeeded(ctx); err != nil {
+		return err
+	}
 
 	lastMigrationNumber, err := conn.getLastMigrationNumber(ctx)
 	if err != nil {
@@ -34,7 +36,7 @@ func (conn *DbConnector) ApplyMigrations(ctx context.Context) error {
 		return fmt.Errorf("last applied migration in database with number %d not found", lastMigrationNumber)
 	}
 
-	for i := range migrationsToApply[lastMigrationIndex+1:] {
+	for i := range migrationsToApply[lastMigrationIndex:] {
 		// TODO: add logging
 		migration := migrationsToApply[i]
 
@@ -63,4 +65,18 @@ func (conn *DbConnector) getLastMigrationNumber(ctx context.Context) (int64, err
 	}
 
 	return lastMigrationNumber, nil
+}
+
+func (conn *DbConnector) createMigrationsIfNeeded(ctx context.Context) error {
+	query := `
+CREATE TABLE IF NOT EXISTS migrations (
+	id INTEGER PRIMARY KEY,
+	number INTEGER NOT NULL,
+	applied_at TIMESTAMPTZ NOT NULL
+)
+	`
+	if _, err := conn.db.Master().ExecContext(ctx, query); err != nil {
+		return fmt.Errorf("error on creating migrations if needed: %w", err)
+	}
+	return nil
 }

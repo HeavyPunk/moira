@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/moira-alert/moira"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 const DriverName = "pgx"
@@ -38,6 +39,7 @@ func (d *DefaultDatabase) Replica() RDB {
 
 type DbConnector struct {
 	db Database
+	ctx context.Context
 }
 
 func NewDatabase(
@@ -51,5 +53,6 @@ func NewDatabase(
 		db: &DefaultDatabase{
 			conn: p,
 		},
+		ctx: ctx,
 	}, err
 }
